@@ -24,8 +24,8 @@ import java.util.concurrent.*;
 
 public class CloudWatch extends JavaPlugin {
 
-    @Getter
-    private ChunkLoadListener chunkLoadListener = new ChunkLoadListener();
+  /*@Getter
+    private ChunkLoadListener chunkLoadListener = new ChunkLoadListener();*/
 
     @Getter
     private PlayerJoinListener playerJoinListener = new PlayerJoinListener();
@@ -36,14 +36,14 @@ public class CloudWatch extends JavaPlugin {
     @Getter
     private final static Map<String, EventCountListener> eventCountListeners = new ConcurrentHashMap<>();
 
-    private final static ThreadFactory javaStatisticsThreadFactory = new ThreadFactoryBuilder()
+  /*private final static ThreadFactory javaStatisticsThreadFactory = new ThreadFactoryBuilder()
         .setNameFormat("CloudWatch - Java Statistics")
-        .build();
+        .build();*/
     private final static ThreadFactory minecraftStatisticsThreadFactory = new ThreadFactoryBuilder()
         .setNameFormat("CloudWatch - Minecraft Statistics")
         .build();
 
-    private ScheduledExecutorService javaStatisticsExecutor;
+  //private ScheduledExecutorService javaStatisticsExecutor;
     private ScheduledExecutorService minecraftStatisticsExecutor;
 
     @Getter
