@@ -16,8 +16,6 @@ jobs:
       PAPER_VERSION: 1.20.4
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         
@@ -33,7 +31,7 @@ jobs:
       - name: Set env
         run: |
           build=$(./get-papermc-latest-build.sh "${{ env.PAPER_VERSION }}")
-          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${build}" >> $GITHUB_ENV 
+          echo "IMAGE_TAG=${version}-${build}" >> $GITHUB_ENV 
           
       - name: Build and push
         uses: docker/build-push-action@v5
