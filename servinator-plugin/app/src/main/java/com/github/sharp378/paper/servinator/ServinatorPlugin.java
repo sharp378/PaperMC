@@ -17,15 +17,19 @@ public class ServinatorPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+	saveDefaultConfig();
+	
+	long delay = getConfig().getLong("delay", 5); 
+	getLogger().info("Checking for server inactivity with delay: " + delay + " minutes");
 	playerCountExecutor = Executors.newSingleThreadScheduledExecutor(playerCountThreadFactory);
-        playerCountExecutor.scheduleWithFixedDelay(new PlayerCountRunnable(), 2, 2, TimeUnit.MINUTES);
+        playerCountExecutor.scheduleWithFixedDelay(new PlayerCountRunnable(), delay, delay, TimeUnit.MINUTES);
 
-	// TODO - ecs kill?
+	// TODO - ecs kill if possible
     }
 
     @Override
     public void onDisable() {
-        if (playerCountExecutor != null) {
+	if (playerCountExecutor != null) {
 	  playerCountExecutor.shutdown();
 	}
     }

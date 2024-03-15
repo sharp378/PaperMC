@@ -4,7 +4,7 @@ ARG version
 ARG build
 
 RUN apk update \
-  && apk add --no-cache curl git openssl maven
+  && apk add --no-cache curl
       
 WORKDIR /tmp/server
 
@@ -13,16 +13,12 @@ RUN curl -o server.jar "https://api.papermc.io/v2/projects/paper/versions/${vers
   && chmod 700 server.jar
 
 WORKDIR /tmp/plugins
-RUN git clone https://github.com/MatthewDietrich/CloudWatch.git .
 
-# overwrite files to remove unused metrics
-COPY ./cloudwatch-plugin/ src/main/java/github/metalshark/cloudwatch/
-
-RUN  mvn --batch-mode --update-snapshots package \
-  && chmod 700 target/CloudWatch-1.1.4.jar \
+COPY ./servinator-plugin/ .
+RUN ./gradlew distZip && \
+  chmod 700 app/build/libs/app.jar \
   && mkdir /tmp/server/plugins \
-  && mv target/CloudWatch-1.1.4.jar /tmp/server/plugins/
-
+  && mv app/build/libs/app.jar /tmp/server/plugins/Servinator-0.1.0.jar
 
 
 FROM amazoncorretto:21-alpine-jdk as release
