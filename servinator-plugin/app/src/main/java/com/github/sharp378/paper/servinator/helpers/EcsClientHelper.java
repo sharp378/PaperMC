@@ -1,31 +1,31 @@
 package com.github.sharp378.paper.servinator.helpers;
 
+import com.github.sharp378.paper.servinator.constants.Env;
 import software.amazon.awssdk.services.ecs.EcsClient;
 import software.amazon.awssdk.services.ecs.model.EcsException;
 import software.amazon.awssdk.services.ecs.model.UpdateServiceRequest;
+
+import java.util.function.Consumer;
 
 // TODO - may want to look into async where applicable
 public class EcsClientHelper {
     
     private static EcsClient ecsClient;
-
-    private static void initClient() {
-        ecsClient = EcsClient.create();
+    private static UpdateServiceRequest.Builder baseRequestBuilder;
+    
+    public static void initClient() {
+        if (ecsClient != null) {
+	    return;
+	}
+	
+	ecsClient = EcsClient.create();
+        baseRequestBuilder = UpdateServiceRequest.builder()
+	    .cluster(Env.ECS_CLUSTER_ARN)
+	    .service(Env.ECS_SERVICE_ARN);
     }
 
     public static EcsClient getClient() {
-    	if (ecsClient == null) {
-	    initClient();
-	}
-	
 	return ecsClient;
-    }
-
-    public static String getClientServiceArn() {
-        final String serviceName = ""; //ecsClient.getServiceName();
-
-	// TODO - implement
-	return serviceName;
     }
 
     public static void closeClient() {
@@ -36,8 +36,12 @@ public class EcsClientHelper {
     	ecsClient.close();
     }
 
-    public static void updateSpecificService(UpdateServiceRequest request) {
-        ecsClient.updateService(request);
+    public static void updateSpecificService(Consumer<UpdateServiceRequest.Builder> requestConsumer) {
+        UpdateServiceRequest request = baseRequestBuilder
+            .applyMutation(requestConsumer)
+	    .build();
+
+	ecsClient.updateService(request);
     }
 
 }

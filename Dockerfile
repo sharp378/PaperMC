@@ -15,10 +15,10 @@ RUN curl -o server.jar "https://api.papermc.io/v2/projects/paper/versions/${vers
 WORKDIR /tmp/plugins
 
 COPY ./servinator-plugin/ .
-RUN ./gradlew distZip && \
-  chmod 700 app/build/libs/app.jar \
+RUN ./gradlew shadowJar && \
+  chmod 700 app/build/libs/app-all.jar \
   && mkdir /tmp/server/plugins \
-  && mv app/build/libs/app.jar /tmp/server/plugins/Servinator-0.1.0.jar
+  && mv app/build/libs/app-all.jar /tmp/server/plugins/Servinator-0.1.0.jar
 
 
 FROM amazoncorretto:21-alpine-jdk as release
@@ -27,6 +27,11 @@ RUN adduser --system --disabled-password paper
 
 WORKDIR /home/paper
 COPY --from=build --chown=paper /tmp/server .
+
+ENV PLUGIN_DELAY=5
+ENV ECS_ENABLED=false
+ENV ECS_CLUSTER_ARN=changeme
+ENV ECS_SERVICE_ARN=changeme
 
 USER paper
 ENTRYPOINT ["java", "-jar", "server.jar", "--nogui"]
