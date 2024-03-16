@@ -30,18 +30,20 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Get tag
+      - name: Set env
         run: |
-          build=$(./get-papermc-latest-build.sh "${{ env.PAPER_VERSION }}")
-          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${build}" >> $GITHUB_ENV 
+          echo "PAPER_BUILD=$(./get-papermc-latest-build.sh ${{ env.PAPER_VERSION }})" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${{ env.PAPER_BUILD }}" >> $GITHUB_ENV 
           
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          build-args: version=${{ env.PAPER_VERSION }},build=
+          build-args: version=${{ env.PAPER_VERSION }},build=${{ env.PAPER_BUILD }}
           target: release
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.DOCKERHUB_REPO }}:${{ env.IMAGE_TAG }}
+          tags: |
+            ${{ env.DOCKERHUB_REPO }}:${{ env.IMAGE_TAG }}
+            ${{ env.DOCKERHUB_REPO }}:latest
           
