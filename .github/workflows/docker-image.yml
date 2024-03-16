@@ -32,8 +32,9 @@ jobs:
 
       - name: Set env
         run: |
-          echo "PAPER_BUILD=$(./get-papermc-latest-build.sh ${{ env.PAPER_VERSION }})" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${{ env.PAPER_BUILD }}" >> $GITHUB_ENV 
+          build=$(./get-papermc-latest-build.sh "${{ env.PAPER_VERSION }}")
+          echo "PAPER_BUILD=${build}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${build}" >> $GITHUB_ENV 
           
       - name: Build and push
         uses: docker/build-push-action@v5
