@@ -5,23 +5,17 @@ import software.amazon.awssdk.services.ecs.EcsClient;
 import software.amazon.awssdk.services.ecs.model.EcsException;
 import software.amazon.awssdk.services.ecs.model.UpdateServiceRequest;
 
-import java.util.function.Consumer;
-
 // TODO - may want to look into async where applicable
 public class EcsClientHelper {
     
     private static EcsClient ecsClient;
-    private static UpdateServiceRequest.Builder baseRequestBuilder;
-    
+
     public static void initClient() {
         if (ecsClient != null) {
 	    return;
 	}
 	
 	ecsClient = EcsClient.create();
-        baseRequestBuilder = UpdateServiceRequest.builder()
-	    .cluster(Env.ECS_CLUSTER_ARN)
-	    .service(Env.ECS_SERVICE_ARN);
     }
 
     public static EcsClient getClient() {
@@ -36,11 +30,19 @@ public class EcsClientHelper {
     	ecsClient.close();
     }
 
-    public static void updateSpecificService(Consumer<UpdateServiceRequest.Builder> requestConsumer) {
-        UpdateServiceRequest request = baseRequestBuilder
-            .applyMutation(requestConsumer)
-	    .build();
+    public static void updateService(UpdateServiceRequest.Builder requestBuilder) {
+	UpdateServiceRequest initialRequest = requestBuilder.build();
+        
+	// set default request values
+	if (initialRequest.cluster() == null) {
+	    requestBuilder.cluster(Env.ECS_CLUSTER_ARN);
+	}
 
+	if (initialRequest.service() == null) {
+	    requestBuilder.service(Env.ECS_SERVICE_ARN);
+	}
+
+	UpdateServiceRequest request = requestBuilder.build();
 	ecsClient.updateService(request);
     }
 
