@@ -46,10 +46,10 @@ public class ServinatorPlugin extends JavaPlugin {
 	    logger.info("ECS service handling is enabled");
 	}
 
-	final long delay = Env.PLUGIN_DELAY; 
-	logger.info("Checking for server inactivity with delay: " + delay + " minutes");
+	final long interval = Env.INTERVAL; 
+	logger.info("Checking for server inactivity every " + interval + " minutes");
 	playerCountExecutor = Executors.newSingleThreadScheduledExecutor(playerCountThreadFactory);
-        playerCountExecutor.scheduleWithFixedDelay(new PlayerCountRunnable(logger), delay, delay, TimeUnit.MINUTES);
+        playerCountExecutor.scheduleWithFixedDelay(new PlayerCountRunnable(), interval, interval, TimeUnit.MINUTES);
     }
 
     @Override

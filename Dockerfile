@@ -18,7 +18,7 @@ COPY ./servinator-plugin/ .
 RUN ./gradlew shadowJar --no-daemon && \
   chmod 700 app/build/libs/app-all.jar \
   && mkdir /tmp/server/plugins \
-  && mv app/build/libs/app-all.jar /tmp/server/plugins/Servinator-0.1.0.jar
+  && mv app/build/libs/app-all.jar /tmp/server/plugins/Servinator-0.1.1.jar
 
 
 FROM amazoncorretto:21-alpine-jdk as release
@@ -28,7 +28,7 @@ RUN adduser --system --disabled-password paper
 WORKDIR /home/paper
 COPY --from=build --chown=paper /tmp/server .
 
-ENV PLUGIN_DELAY=5
+ENV INTERVAL=5
 ENV ECS_ENABLED=false
 ENV ECS_CLUSTER_ARN=changeme
 ENV ECS_SERVICE_ARN=changeme
