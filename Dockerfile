@@ -15,7 +15,7 @@ RUN curl -o server.jar "https://api.papermc.io/v2/projects/paper/versions/${vers
 WORKDIR /tmp/plugins
 
 COPY ./servinator-plugin/ .
-RUN ./gradlew shadowJar && \
+RUN ./gradlew shadowJar --no-daemon && \
   chmod 700 app/build/libs/app-all.jar \
   && mkdir /tmp/server/plugins \
   && mv app/build/libs/app-all.jar /tmp/server/plugins/Servinator-0.1.0.jar
