@@ -23,6 +23,11 @@ RUN url=$(curl -s https://api.github.com/repos/sharp378/Servinator/releases/late
 
 FROM amazoncorretto:21-alpine-jdk as release
 
+LABEL org.opencontainers.image.name="Paper Minecraft Server"
+LABEL org.opencontainers.image.authors="sharpscontainer"
+LABEL org.opencontainers.image.description="A simple Paper server for Minecraft that self terminates"
+LABEL org.opencontainers.image.source="https://github.com/sharp378/PaperMC"
+
 RUN adduser --system --disabled-password paper
 
 WORKDIR /home/paper
