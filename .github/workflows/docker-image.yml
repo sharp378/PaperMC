@@ -10,10 +10,11 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
     env:
       DOCKERHUB_REPO: sharpscontainer/paper-mc
       PAPER_VERSION: 1.20.4
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -49,4 +50,12 @@ jobs:
           tags: |
             ${{ env.DOCKERHUB_REPO }}:${{ env.IMAGE_TAG }}
             ${{ env.DOCKERHUB_REPO }}:latest
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          commit: ${{ github.sha }}
+          tag: ${{ env.RELEASE_TAG }}
+          generateReleaseNotes: true
+          allowUpdates: true
           

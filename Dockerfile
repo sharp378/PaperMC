@@ -1,4 +1,4 @@
-FROM amazoncorretto:21-alpine-jdk as build
+FROM alpine:3.19 as build
 
 ARG version
 ARG build
@@ -10,15 +10,15 @@ WORKDIR /tmp/server
 
 RUN curl -o server.jar "https://api.papermc.io/v2/projects/paper/versions/${version}/builds/${build}/downloads/paper-${version}-${build}.jar" \
   && echo 'eula=true' > eula.txt \
-  && chmod 700 server.jar
+  && chmod 500 server.jar
 
 WORKDIR /tmp/plugins
 
-COPY ./servinator-plugin/ .
-RUN ./gradlew shadowJar --no-daemon && \
-  chmod 700 app/build/libs/app-all.jar \
+RUN url=$(curl -s https://api.github.com/repos/sharp378/Servinator/releases/latest | grep "browser_download_url" | awk -F '"' '{print $4}' | grep '[0-9]\.jar') \
+  && curl -LJO "$url" \
+  && chmod 500 *.jar \
   && mkdir /tmp/server/plugins \
-  && mv app/build/libs/app-all.jar /tmp/server/plugins/Servinator-0.1.1.jar
+  && mv *.jar /tmp/server/plugins/
 
 
 FROM amazoncorretto:21-alpine-jdk as release
@@ -28,10 +28,7 @@ RUN adduser --system --disabled-password paper
 WORKDIR /home/paper
 COPY --from=build --chown=paper /tmp/server .
 
-ENV INTERVAL=5
-ENV ECS_ENABLED=false
-ENV ECS_CLUSTER_ARN=changeme
-ENV ECS_SERVICE_ARN=changeme
+ENV SERVINATOR_INTERVAL=5
 
 USER paper
 ENTRYPOINT ["java", "-jar", "server.jar", "--nogui"]
