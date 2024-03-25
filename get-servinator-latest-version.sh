@@ -1,1 +1,2 @@
-echo $(curl -s "https://api.github.com/repos/sharp378/Servinator/releases/latest" | jq -r '.tag_name')
+latest=$(echo $(curl -s "https://api.github.com/repos/sharp378/Servinator/releases/latest" | jq -r '.tag_name'))
+echo ${latest:1}
