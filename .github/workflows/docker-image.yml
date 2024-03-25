@@ -33,7 +33,7 @@ jobs:
             build=$(echo $latest_tag | cut -d '-' -f 2)
             if [ $paper_latest_build -eq $build ]; then
               echo "No new PaperMC builds at this time"
-              exit(1);
+              exit 1;
             fi
           fi
 
