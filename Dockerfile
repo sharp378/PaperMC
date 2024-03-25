@@ -29,6 +29,9 @@ RUN addgroup --gid 1000 paper \
 WORKDIR /home/paper
 USER paper:paper
 
+VOLUME /home/paper
+EXPOSE 25565
+
 ENV SERVINATOR_INTERVAL=5
 
 ENTRYPOINT ["/tmp/server/start-server.sh"]
