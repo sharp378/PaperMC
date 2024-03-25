@@ -3,6 +3,8 @@ name: Docker Image CI
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '25 4 * * *'
   workflow_dispatch:
 
 jobs:
@@ -10,14 +12,33 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+
     env:
       DOCKERHUB_REPO: sharpscontainer/paper-mc
       PAPER_VERSION: 1.20.4
+
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 
+      
+      - name: check if triggered by schedule, set env
+        run: | 
+          paper_latest_build=$(./get-papermc-latest-build "${{ env.PAPER_VERSION }}")
+
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            # check if new build should be created
+            latest_tag=$(git describe --tags --abbrev=0)
+            build=$(echo $latest_tag | cut -d '-' -f 2)
+            if [ $paper_latest_build -eq $build ]; then
+              echo "No new PaperMC builds at this time"
+              exit(1);
+            fi
+          fi
+
+          echo "PAPER_BUILD=${paper_latest_build}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${paper_latest_build}" >> $GITHUB_ENV 
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -33,16 +54,14 @@ jobs:
 
       - name: Set env
         run: |
-          build=$(./get-papermc-latest-build.sh "${{ env.PAPER_VERSION }}")
-          echo "PAPER_BUILD=${build}" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${build}" >> $GITHUB_ENV 
           
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           build-args: |
-            version=${{ env.PAPER_VERSION }}
-            build=${{ env.PAPER_BUILD }}
+            paper_version=${{ env.PAPER_VERSION }}
+            paper_build=${{ env.PAPER_BUILD }}
+            servinator_version=${{ env.SERVINATOR_VERSION }}
           target: release
           context: .
           platforms: linux/amd64,linux/arm64
