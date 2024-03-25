@@ -1,25 +1,16 @@
 FROM alpine:3.19 as build
 
-ARG version
-ARG build
+ARG paper_version
+ARG paper_build
+ARG servinator_version
 
-RUN apk update \
-  && apk add --no-cache curl
-      
 WORKDIR /tmp/server
-
-RUN curl -o server.jar "https://api.papermc.io/v2/projects/paper/versions/${version}/builds/${build}/downloads/paper-${version}-${build}.jar" \
-  && echo 'eula=true' > eula.txt \
-  && chmod 500 server.jar
+ADD "https://api.papermc.io/v2/projects/paper/versions/${paper_version}/builds/${paper_build}/downloads/paper-${paper_version}-${paper_build}.jar" ./server.jar
+COPY ./start-server.sh .
+RUN echo 'eula=true' > eula.txt
 
 WORKDIR /tmp/plugins
-
-RUN url=$(curl -s https://api.github.com/repos/sharp378/Servinator/releases/latest | grep "browser_download_url" | awk -F '"' '{print $4}' | grep '[0-9]\.jar') \
-  && curl -LJO "$url" \
-  && chmod 500 *.jar \
-  && mkdir /tmp/server/plugins \
-  && mv *.jar /tmp/server/plugins/
-
+ADD "https://github.com/sharp378/Servinator/releases/download/v${servinator_version}/ServinatorPlugin-${servinator_version}.jar" .
 
 FROM amazoncorretto:21-alpine-jdk as release
 
@@ -28,12 +19,19 @@ LABEL org.opencontainers.image.authors="sharpscontainer"
 LABEL org.opencontainers.image.description="A simple Paper server for Minecraft that self terminates"
 LABEL org.opencontainers.image.source="https://github.com/sharp378/PaperMC"
 
-RUN adduser --system --disabled-password paper
+COPY --from=build --chmod=755 /tmp/server /tmp/server
+COPY --from=build --chmod=755 /tmp/plugins /tmp/plugins
+
+RUN addgroup --gid 1000 paper \
+  && adduser --disabled-password --uid 1000 --ingroup paper paper \
+  && chown paper:paper /home/paper
 
 WORKDIR /home/paper
-COPY --from=build --chown=paper /tmp/server .
+USER paper:paper
+
+VOLUME /home/paper
+EXPOSE 25565
 
 ENV SERVINATOR_INTERVAL=5
 
-USER paper
-ENTRYPOINT ["java", "-jar", "server.jar", "--nogui"]
+ENTRYPOINT ["/tmp/server/start-server.sh"]
