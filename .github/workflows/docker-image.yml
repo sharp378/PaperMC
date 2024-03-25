@@ -25,7 +25,7 @@ jobs:
       
       - name: check if triggered by schedule, set env
         run: | 
-          paper_latest_build=$(./get-papermc-latest-build "${{ env.PAPER_VERSION }}")
+          paper_latest_build=$(./get-papermc-latest-build.sh "${{ env.PAPER_VERSION }}")
 
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
             # check if new build should be created
