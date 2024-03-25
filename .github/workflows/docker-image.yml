@@ -37,8 +37,10 @@ jobs:
             fi
           fi
 
+          servinator_version=$(./get-servinator-latest-version.sh)
           echo "PAPER_BUILD=${paper_latest_build}" >> $GITHUB_ENV
           echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${paper_latest_build}" >> $GITHUB_ENV 
+          echo "SERVINATOR_VERSION=${servinator_version}" >> $GITHUB_ENV
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
