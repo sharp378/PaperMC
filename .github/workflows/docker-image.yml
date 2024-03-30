@@ -33,7 +33,7 @@ jobs:
             fi
           fi
 
-          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${paper_latest_build}" >> $GITHUB_OUTPUTS
+          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${paper_latest_build}" >> "$GITHUB_OUTPUT"
 
   build:
     
