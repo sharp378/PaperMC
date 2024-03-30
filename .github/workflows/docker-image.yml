@@ -69,8 +69,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           build-args: |
-            paper_version=${{ env.IMAGE_TAG | cut -d '-' -f 1 }}
-            paper_build=${{ env.IMAGE_TAG | cut -d '-' -f 2 }}
+            paper_version=$(echo ${{ env.IMAGE_TAG }} | cut -d '-' -f 1)
+            paper_build=$(echo ${{ env.IMAGE_TAG }} | cut -d '-' -f 2)
             servinator_version=$(./get-servinator-latest-version.sh)
           target: release
           context: .
