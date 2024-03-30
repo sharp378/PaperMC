@@ -9,15 +9,18 @@ on:
 
 jobs:
 
+  # if triggered by schedule, determine if a new release is needed. 
   check-schedule:
 
     runs-on: ubuntu-latest
-
-    outputs:
-      IMAGE_TAG: ${{ steps.set-env.outputs.IMAGE_TAG }}
-
+    
     env:
       PAPER_VERSION: 1.20.4
+      
+    outputs:
+      IMAGE_TAG: ${{ steps.set-env.outputs.IMAGE_TAG }}
+      PAPER_VERSION: ${{ env.PAPER_VERSION }}
+      PAPER_BUILD : ${{ steps.set-env.outputs.PAPER_BUILD }}
 
     steps:
       - uses: actions/checkout@v4 
@@ -38,6 +41,7 @@ jobs:
           fi
 
           echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${paper_latest_build}" >> "$GITHUB_OUTPUT"
+          echo "PAPER_BUILD=${paper_latest_build}" >> "GITHUB_OUTPUT"
 
   build:
     
@@ -50,12 +54,19 @@ jobs:
     env:
       DOCKERHUB_REPO: sharpscontainer/paper-mc
       IMAGE_TAG: ${{ needs.check-schedule.outputs.IMAGE_TAG }}
+      PAPER_BUILD: ${{ needs.check-schedule.outputs.PAPER_BUILD }}
+      PAPER_VERSION: ${{ needs.check-schedule.outputs.PAPER_VERSION }}
 
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4 
+      - uses: actions/checkout@v4
+
+      - name: Set env
+        run : |
+          servinator_version=$(./get-servinator-latest-version.sh)
+          echo "SERVINATOR_VERSION=${servinator_version}" >> $GITHUB_ENV
       
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -73,9 +84,9 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           build-args: |
-            paper_version=$(echo ${{ env.IMAGE_TAG }} | cut -d '-' -f 1)
-            paper_build=$(echo ${{ env.IMAGE_TAG }} | cut -d '-' -f 2)
-            servinator_version=$(./get-servinator-latest-version.sh)
+            paper_version=${{ env.PAPER_VERSION }}
+            paper_build=${{ env.PAPER_BUILD }}
+            servinator_version=$ {{ env.SERVINATOR_VERSION }}
           target: release
           context: .
           platforms: linux/amd64,linux/arm64
