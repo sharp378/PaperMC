@@ -9,16 +9,12 @@ on:
 
 jobs:
 
-  build:
+  check-schedule:
 
     runs-on: ubuntu-latest
 
     env:
-      DOCKERHUB_REPO: sharpscontainer/paper-mc
       PAPER_VERSION: 1.20.4
-
-    permissions:
-      contents: write
 
     steps:
       - uses: actions/checkout@v4 
@@ -29,19 +25,34 @@ jobs:
 
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
             # check if new build should be created
-            latest_tag=$(git describe --tags --abbrev=0)
+            latest_tag=$(echo $(curl -s "https://api.github.com/repos/sharp378/PaperMC/releases/latest" | jq -r '.tag_name'))
             build=$(echo $latest_tag | cut -d '-' -f 2)
             if [ $paper_latest_build -eq $build ]; then
               echo "No new PaperMC builds at this time"
-              exit 1;
+              exit 0
             fi
           fi
 
-          servinator_version=$(./get-servinator-latest-version.sh)
-          echo "PAPER_BUILD=${paper_latest_build}" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${paper_latest_build}" >> $GITHUB_ENV 
-          echo "SERVINATOR_VERSION=${servinator_version}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${paper_latest_build}" >> $GITHUB_OUTPUTS
 
+  build:
+    
+    needs: check-schedule
+
+    if: ${{ needs.check-schedule.outputs.IMAGE_TAG != '' }}
+  
+    runs-on: ubuntu-latest
+    
+    env:
+      DOCKERHUB_REPO: sharpscontainer/paper-mc
+      IMAGE_TAG: ${{ needs.check-schedule.outputs.IMAGE_TAG }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4 
+      
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         
@@ -53,17 +64,14 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set env
-        run: |
           
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           build-args: |
-            paper_version=${{ env.PAPER_VERSION }}
-            paper_build=${{ env.PAPER_BUILD }}
-            servinator_version=${{ env.SERVINATOR_VERSION }}
+            paper_version=${{ env.IMAGE_TAG | cut -d '-' -f 1 }}
+            paper_build=${{ env.IMAGE_TAG | cut -d '-' -f 2 }}
+            servinator_version=$(./get-servinator-latest-version.sh)
           target: release
           context: .
           platforms: linux/amd64,linux/arm64
