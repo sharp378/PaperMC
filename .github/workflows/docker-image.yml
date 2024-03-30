@@ -41,7 +41,7 @@ jobs:
           fi
 
           echo "IMAGE_TAG=${{ env.PAPER_VERSION }}-${paper_latest_build}" >> "$GITHUB_OUTPUT"
-          echo "PAPER_BUILD=${paper_latest_build}" >> "GITHUB_OUTPUT"
+          echo "PAPER_BUILD=${paper_latest_build}" >> "$GITHUB_OUTPUT"
 
   build:
     
