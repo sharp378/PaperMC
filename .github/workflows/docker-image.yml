@@ -20,7 +20,7 @@ jobs:
     outputs:
       IMAGE_TAG: ${{ steps.set-env.outputs.IMAGE_TAG }}
       PAPER_VERSION: ${{ env.PAPER_VERSION }}
-      PAPER_BUILD : ${{ steps.set-env.outputs.PAPER_BUILD }}
+      PAPER_BUILD: ${{ steps.set-env.outputs.PAPER_BUILD }}
 
     steps:
       - uses: actions/checkout@v4 
@@ -86,7 +86,7 @@ jobs:
           build-args: |
             paper_version=${{ env.PAPER_VERSION }}
             paper_build=${{ env.PAPER_BUILD }}
-            servinator_version=$ {{ env.SERVINATOR_VERSION }}
+            servinator_version=${{ env.SERVINATOR_VERSION }}
           target: release
           context: .
           platforms: linux/amd64,linux/arm64
