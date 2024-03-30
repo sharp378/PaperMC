@@ -13,6 +13,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    outputs:
+      IMAGE_TAG: ${{ steps.set-env.outputs.IMAGE_TAG }}
+
     env:
       PAPER_VERSION: 1.20.4
 
@@ -20,6 +23,7 @@ jobs:
       - uses: actions/checkout@v4 
       
       - name: check if triggered by schedule, set env
+        id: set-env
         run: | 
           paper_latest_build=$(./get-papermc-latest-build.sh "${{ env.PAPER_VERSION }}")
 
