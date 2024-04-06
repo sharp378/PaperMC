@@ -100,6 +100,5 @@ jobs:
         with:
           commit: ${{ github.sha }}
           tag: ${{ env.IMAGE_TAG }}
-          generateReleaseNotes: true
           allowUpdates: true
           
