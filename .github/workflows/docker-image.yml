@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      PAPER_VERSION: 1.20.4
+      PAPER_VERSION: 1.20.6
       
     outputs:
       IMAGE_TAG: ${{ steps.set-env.outputs.IMAGE_TAG }}
