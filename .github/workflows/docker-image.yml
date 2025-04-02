@@ -28,13 +28,13 @@ jobs:
       - name: check if triggered by schedule, set env
         id: set-env
         run: | 
-          paper_latest_build=$(./get-papermc-latest-build.sh "${{ env.PAPER_VERSION }}")
+          paper_latest_build="$(./get-papermc-latest-build.sh ${{ env.PAPER_VERSION }})"
 
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
             # check if new build should be created
-            latest_tag=$(echo $(curl -s "https://api.github.com/repos/sharp378/PaperMC/releases/latest" | jq -r '.tag_name'))
-            build=$(echo $latest_tag | cut -d '-' -f 2)
-            if [ $paper_latest_build -eq $build ]; then
+            latest_tag="$(echo $(curl -s https://api.github.com/repos/sharp378/PaperMC/releases/latest | jq -r '.tag_name'))"
+            build="$(echo $latest_tag | cut -d '-' -f 2)"
+            if [ "$paper_latest_build" -eq "$build" ]; then
               echo "No new PaperMC builds at this time"
               exit 0
             fi
@@ -65,7 +65,7 @@ jobs:
 
       - name: Set env
         run : |
-          servinator_version=$(./get-servinator-latest-version.sh)
+          servinator_version="$(./get-servinator-latest-version.sh)"
           echo "SERVINATOR_VERSION=${servinator_version}" >> $GITHUB_ENV
       
       - name: Set up QEMU
